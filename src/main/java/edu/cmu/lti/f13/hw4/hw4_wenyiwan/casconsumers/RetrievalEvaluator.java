@@ -3,8 +3,6 @@ package edu.cmu.lti.f13.hw4.hw4_wenyiwan.casconsumers;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -102,9 +100,7 @@ public class RetrievalEvaluator extends CasConsumer_ImplBase {
       }
       docList.add(token2Freq); // Word frequency for each sentence is recorded.
 
-      // System.out.println("cur doc id: " + doc.getQueryID());
       if (doc.getQueryID() != prevQueryID) { // a new query
-        // System.out.println(prevQueryID);
         prevQueryID = doc.getQueryID();
         // record the postions of queries in the document.
         qPos.add(docList.size() - 1);
@@ -146,15 +142,13 @@ public class RetrievalEvaluator extends CasConsumer_ImplBase {
       // use the treemap to store similarity
       TreeMap<Double, Integer> records = new TreeMap<Double, Integer>();
       for (int aPos : ansList) {
-        System.out.println(String.format("%f,%d", simList.get(aPos), aPos));
         records.put(simList.get(aPos), aPos);
       }
       ArrayList<Entry<Double, Integer>> keys = new ArrayList<Entry<Double, Integer>>(
               records.entrySet());
       int i = 0;
-      System.out.println("size: " + keys.size());
       while (i < keys.size()) {
-        System.out.println(keys.size() - i);
+        // System.out.println(String.format("%d,%d", keys.get(i).getValue(), keys.size() - i));
         rankList.set(keys.get(i).getValue(), keys.size() - i);
         i++;
       }
@@ -182,7 +176,7 @@ public class RetrievalEvaluator extends CasConsumer_ImplBase {
    */
   private double computeCosineSimilarity(Map<String, Integer> queryVector,
           Map<String, Integer> docVector) {
-    double cosine_similarity = 0.0;
+    double cosSim = 0.0;
 
     // TODO :: compute cosine similarity between two sentences
     double sqrSumOne = 0.0;
@@ -196,16 +190,23 @@ public class RetrievalEvaluator extends CasConsumer_ImplBase {
       if (docVector.containsKey(word)) {
         freqTwo = docVector.get(word);
       }
-      cosine_similarity += freqOne * freqTwo;
+      cosSim += freqOne * freqTwo;
       sqrSumOne += Math.pow(freqOne, 2);
       sqrSumTwo += Math.pow(freqTwo, 2);
     }
-    if (cosine_similarity != 0) {
-      cosine_similarity /= Math.pow((Math.sqrt(sqrSumOne) * Math.sqrt(sqrSumTwo)), 1.6);
+    if (cosSim != 0) {
+      cosSim /= Math.pow((Math.sqrt(sqrSumOne) * Math.sqrt(sqrSumTwo)), 1.7);
+      // 1.5-1.7 will be better.
+//      cosSim = 1 - 2 * Math.acos(cosSim) / Math.PI;
     }
-    return cosine_similarity;
+    return cosSim;
   }
 
+  /**
+   * This is the method to compute Dice Coeff.
+   * 
+   * @return DiceCoeff
+   */
   private double computeDiceCoeff(Map<String, Integer> queryVector, Map<String, Integer> docVector) {
     Set<String> listOne = new HashSet<String>();
     Set<String> common = new HashSet<String>();
@@ -221,6 +222,11 @@ public class RetrievalEvaluator extends CasConsumer_ImplBase {
     return 2.0 * (common.size() + 1) / (queryVector.size() + docVector.size() + 2);
   }
 
+  /**
+   * This is the method to compute Jaccard Coeff
+   * 
+   * @return Jaccard Coeff
+   */
   private double computeJaccardCoeff(Map<String, Integer> queryVector,
           Map<String, Integer> docVector) {
     Set<String> listOne = new HashSet<String>();

@@ -5,10 +5,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -17,8 +15,6 @@ import org.apache.uima.analysis_component.JCasAnnotator_ImplBase;
 import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.cas.FSIterator;
 import org.apache.uima.jcas.JCas;
-import org.apache.uima.jcas.cas.IntegerArray;
-import org.apache.uima.jcas.cas.StringArray;
 import org.apache.uima.jcas.tcas.Annotation;
 import org.apache.uima.resource.ResourceInitializationException;
 import org.uimafit.util.FSCollectionFactory;
@@ -26,7 +22,6 @@ import org.uimafit.util.FSCollectionFactory;
 import edu.cmu.lti.f13.hw4.hw4_wenyiwan.VectorSpaceRetrieval;
 import edu.cmu.lti.f13.hw4.hw4_wenyiwan.typesystems.Document;
 import edu.cmu.lti.f13.hw4.hw4_wenyiwan.typesystems.Token;
-import edu.stanford.nlp.ling.CoreLabel;
 
 /**
  * @author wwy This is the class for document annotation.

@@ -25,7 +25,6 @@
 package edu.cmu.lti.f13.hw4.hw4_wenyiwan;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.InputStreamReader;
 import java.net.URL;
 
