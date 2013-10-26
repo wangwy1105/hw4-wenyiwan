@@ -131,10 +131,12 @@ public class RetrievalEvaluator extends CasConsumer_ImplBase {
     // TODO :: compute the cosine similarity measure
     for (int pos : qPos) {
       ArrayList<Integer> ansList = aPos.get(qIdList.get(pos));
-      for (int aPos : ansList) {// for each answer index, get the answer doc.
-        // double res = computeDice(documents.get(pos), documents.get(aPos));
+      for (int aPos : ansList) {
         // record the similarity result
         simList.set(aPos, computeCosineSimilarity(docList.get(pos), docList.get(aPos)));
+        // simList.set(aPos, computeDiceCoeff(docList.get(pos), docList.get(aPos)));
+        // simList.set(aPos, computeJaccardCoeff(docList.get(pos), docList.get(aPos)));
+
       }
     }
 
@@ -144,11 +146,17 @@ public class RetrievalEvaluator extends CasConsumer_ImplBase {
       // use the treemap to store similarity
       TreeMap<Double, Integer> records = new TreeMap<Double, Integer>();
       for (int aPos : ansList) {
+        System.out.println(String.format("%f,%d", simList.get(aPos), aPos));
         records.put(simList.get(aPos), aPos);
       }
-      ArrayList<Entry<Double, Integer>> keys = new ArrayList<Entry<Double, Integer>>(records.entrySet());
-      for (int i = 0; i < keys.size(); i++) {
+      ArrayList<Entry<Double, Integer>> keys = new ArrayList<Entry<Double, Integer>>(
+              records.entrySet());
+      int i = 0;
+      System.out.println("size: " + keys.size());
+      while (i < keys.size()) {
+        System.out.println(keys.size() - i);
         rankList.set(keys.get(i).getValue(), keys.size() - i);
+        i++;
       }
     }
 
@@ -157,7 +165,7 @@ public class RetrievalEvaluator extends CasConsumer_ImplBase {
       if (relList.get(i) == 99)
         prevQPos = i;
       if (relList.get(i) == 1) {
-        System.out.println(String.format("Score: %.10f\trank=%d\trel=%d qid=%d sent=%d",
+        System.out.println(String.format("Score: %.16f\trank=%d\trel=%d qid=%d sent=%d",
                 simList.get(i), rankList.get(i), relList.get(i), qIdList.get(i), i - prevQPos));
       }
     }
@@ -169,6 +177,7 @@ public class RetrievalEvaluator extends CasConsumer_ImplBase {
 
   /**
    * This is the method to compute cosine_similarity.
+   * 
    * @return cosine_similarity
    */
   private double computeCosineSimilarity(Map<String, Integer> queryVector,
@@ -192,13 +201,45 @@ public class RetrievalEvaluator extends CasConsumer_ImplBase {
       sqrSumTwo += Math.pow(freqTwo, 2);
     }
     if (cosine_similarity != 0) {
-      cosine_similarity /= Math.pow((Math.sqrt(sqrSumOne) * Math.sqrt(sqrSumTwo)),1.6);
+      cosine_similarity /= Math.pow((Math.sqrt(sqrSumOne) * Math.sqrt(sqrSumTwo)), 1.6);
     }
     return cosine_similarity;
   }
 
+  private double computeDiceCoeff(Map<String, Integer> queryVector, Map<String, Integer> docVector) {
+    Set<String> listOne = new HashSet<String>();
+    Set<String> common = new HashSet<String>();
+
+    for (Entry<String, Integer> entry : queryVector.entrySet()) {
+      listOne.add(entry.getKey());
+    }
+    for (Entry<String, Integer> entry : docVector.entrySet()) {
+      if (!listOne.contains(entry.getKey())) {
+        common.add(entry.getKey());
+      }
+    }
+    return 2.0 * (common.size() + 1) / (queryVector.size() + docVector.size() + 2);
+  }
+
+  private double computeJaccardCoeff(Map<String, Integer> queryVector,
+          Map<String, Integer> docVector) {
+    Set<String> listOne = new HashSet<String>();
+    Set<String> common = new HashSet<String>();
+
+    for (Entry<String, Integer> entry : queryVector.entrySet()) {
+      listOne.add(entry.getKey());
+    }
+    for (Entry<String, Integer> entry : docVector.entrySet()) {
+      if (!listOne.contains(entry.getKey())) {
+        common.add(entry.getKey());
+      }
+    }
+    return (common.size() + 1) / (queryVector.size() + docVector.size() - common.size() + 2);
+  }
+
   /**
    * This is the method to compute MRR.
+   * 
    * @return mrr
    */
   private double compute_mrr() {
@@ -206,14 +247,11 @@ public class RetrievalEvaluator extends CasConsumer_ImplBase {
 
     // TODO :: compute Mean Reciprocal Rank (MRR) of the text collection
     for (int i = 0; i < docList.size(); i++) {
-      if (relList.get(i) == 1)
+      if (relList.get(i) == 1) {
         metric_mrr += 1.0 / rankList.get(i);
+      }
     }
     metric_mrr /= qPos.size();
-
-    // TODO :: compute Mean Reciprocal Rank (MRR) of the text collection
-
     return metric_mrr;
   }
-
 }
