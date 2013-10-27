@@ -152,6 +152,18 @@ public class RetrievalEvaluator extends CasConsumer_ImplBase {
         rankList.set(keys.get(i).getValue(), keys.size() - i);
         i++;
       }
+
+      // used a tree map to map score to answer, using the score as key is not good;
+      // because score may be duplicated.
+
+      /*
+       * ArrayList<Entry<Integer, Double>> bufferList = new ArrayList<Entry<Integer, Double>>(
+       * simBuffer.entrySet()); 
+       * Collections.sort(bufferList, new Comparator<Entry<Integer,
+       * Double>>() { public int compare(Entry<Integer, Double> e1, Entry<Integer, Double> e2) {
+       * return e2.getValue().compareTo(e1.getValue()); } });
+       */
+
     }
 
     int prevQPos = Integer.MIN_VALUE;
@@ -197,7 +209,7 @@ public class RetrievalEvaluator extends CasConsumer_ImplBase {
     if (cosSim != 0) {
       cosSim /= Math.pow((Math.sqrt(sqrSumOne) * Math.sqrt(sqrSumTwo)), 1.7);
       // 1.5-1.7 will be better.
-//      cosSim = 1 - 2 * Math.acos(cosSim) / Math.PI;
+      // cosSim = 1 - 2 * Math.acos(cosSim) / Math.PI;
     }
     return cosSim;
   }
